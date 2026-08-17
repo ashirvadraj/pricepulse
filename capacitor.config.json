@@ -1,0 +1,9 @@
+{
+  "appId": "com.pricepulse.india",
+  "appName": "PricePulse India",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
