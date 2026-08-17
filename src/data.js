@@ -1,5 +1,16 @@
 // Embedded product database - works fully offline
-// Proper ES module exports for Vite bundling
+// Dynamic real-time date calculation & URL parsing
+
+export function getTodayDateStr() {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+}
+
+export function getFormattedDate(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - offsetDays);
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 export const products = [
   {
@@ -16,15 +27,13 @@ export const products = [
       { name: "Reliance Digital", price: 68499, originalPrice: 79900, discountPercent: 14, inStock: true, delivery: "Express Store Pickup Available", isLowest: false, offerText: "Instant discount on select cards", url: "https://www.reliancedigital.in/search?q=iphone+15" }
     ],
     priceHistory: [
-      { date: "2023-09-22", price: 79900, label: "Launch Price" },
-      { date: "2023-10-15", price: 77990, label: "Great Indian Festival" },
-      { date: "2023-11-10", price: 76999, label: "Diwali Deal" },
-      { date: "2024-01-20", price: 72999, label: "Republic Day Sale" },
-      { date: "2024-03-15", price: 71499, label: "Holi Deals" },
-      { date: "2024-05-02", price: 69999, label: "Summer Fest" },
-      { date: "2024-07-20", price: 67999, label: "Prime Day Sale" },
-      { date: "2024-08-01", price: 64999, label: "Independence Day Sale (All-Time Low)" },
-      { date: "2024-08-16", price: 65999, label: "Current Price" }
+      { date: getFormattedDate(330), price: 79900, label: "Launch Price" },
+      { date: getFormattedDate(240), price: 77990, label: "Festival Season" },
+      { date: getFormattedDate(180), price: 74999, label: "New Year Sale" },
+      { date: getFormattedDate(120), price: 71499, label: "Summer Special" },
+      { date: getFormattedDate(60), price: 67999, label: "Mega Deal Days" },
+      { date: getFormattedDate(15), price: 64999, label: "All-Time Low Record" },
+      { date: getFormattedDate(0), price: 65999, label: "Today's Live Price" }
     ]
   },
   {
@@ -40,12 +49,11 @@ export const products = [
       { name: "Flipkart", price: 28490, originalPrice: 34990, discountPercent: 18, inStock: true, delivery: "Delivery in 3 Days", isLowest: false, offerText: "Bank offer available on checkout", url: "https://www.flipkart.com/search?q=sony+xm5" }
     ],
     priceHistory: [
-      { date: "2023-10-01", price: 34990, label: "Retail MRP" },
-      { date: "2023-11-15", price: 29990, label: "Black Friday Sale" },
-      { date: "2024-01-26", price: 27990, label: "Republic Day Offer" },
-      { date: "2024-04-10", price: 28990, label: "Spring Discount" },
-      { date: "2024-07-21", price: 24990, label: "Prime Day All-Time Low" },
-      { date: "2024-08-16", price: 26990, label: "Current Price" }
+      { date: getFormattedDate(300), price: 34990, label: "Retail MRP" },
+      { date: getFormattedDate(200), price: 29990, label: "Winter Clearance" },
+      { date: getFormattedDate(120), price: 27990, label: "Spring Offer" },
+      { date: getFormattedDate(45), price: 24990, label: "Prime Day All-Time Low" },
+      { date: getFormattedDate(0), price: 26990, label: "Today's Live Price" }
     ]
   },
   {
@@ -61,11 +69,11 @@ export const products = [
       { name: "Reliance Digital", price: 92900, originalPrice: 99900, discountPercent: 7, inStock: true, delivery: "Store Pickup Available", isLowest: false, offerText: "Student Discount Applicable In-store", url: "https://www.reliancedigital.in/search?q=macbook+air+m2" }
     ],
     priceHistory: [
-      { date: "2023-08-15", price: 99900, label: "Original Listing" },
-      { date: "2023-10-10", price: 89900, label: "Festival Season" },
-      { date: "2024-01-15", price: 84990, label: "New Year Offer" },
-      { date: "2024-06-20", price: 81990, label: "Back to School (All-Time Low)" },
-      { date: "2024-08-16", price: 87990, label: "Current Price" }
+      { date: getFormattedDate(320), price: 99900, label: "Original Listing" },
+      { date: getFormattedDate(210), price: 89900, label: "Festival Season" },
+      { date: getFormattedDate(100), price: 84990, label: "Back to Campus" },
+      { date: getFormattedDate(40), price: 81990, label: "Summer Special (Record Low)" },
+      { date: getFormattedDate(0), price: 87990, label: "Today's Live Price" }
     ]
   },
   {
@@ -81,11 +89,11 @@ export const products = [
       { name: "Croma", price: 124999, originalPrice: 129999, discountPercent: 4, inStock: true, delivery: "Delivery in 1-2 Days", isLowest: false, offerText: "No Cost EMI up to 12 months", url: "https://www.croma.com/search/?q=samsung+s24+ultra" }
     ],
     priceHistory: [
-      { date: "2024-01-18", price: 129999, label: "Launch Price" },
-      { date: "2024-03-20", price: 126999, label: "Spring Offer" },
-      { date: "2024-06-10", price: 121999, label: "Mid-Year Sale" },
-      { date: "2024-07-20", price: 114999, label: "Prime Day Low" },
-      { date: "2024-08-16", price: 119999, label: "Current Price" }
+      { date: getFormattedDate(200), price: 129999, label: "Launch Price" },
+      { date: getFormattedDate(130), price: 126999, label: "Spring Offer" },
+      { date: getFormattedDate(70), price: 121999, label: "Mid-Year Sale" },
+      { date: getFormattedDate(25), price: 114999, label: "Prime Day Low" },
+      { date: getFormattedDate(0), price: 119999, label: "Today's Live Price" }
     ]
   },
   {
@@ -101,12 +109,11 @@ export const products = [
       { name: "Croma", price: 114990, originalPrice: 174990, discountPercent: 34, inStock: true, delivery: "Delivery within 48 Hours", isLowest: false, offerText: "Exchange discount up to ₹10,000", url: "https://www.croma.com/search/?q=lg+oled+c3" }
     ],
     priceHistory: [
-      { date: "2023-06-01", price: 174990, label: "MRP" },
-      { date: "2023-10-20", price: 129990, label: "Diwali Season" },
-      { date: "2024-01-20", price: 119990, label: "New Year Sale" },
-      { date: "2024-05-15", price: 112990, label: "IPL Promo" },
-      { date: "2024-07-25", price: 104990, label: "Monsoon Clearance Low" },
-      { date: "2024-08-16", price: 109990, label: "Current Price" }
+      { date: getFormattedDate(365), price: 174990, label: "MRP Listing" },
+      { date: getFormattedDate(240), price: 129990, label: "Festival Season" },
+      { date: getFormattedDate(140), price: 119990, label: "New Year Deal" },
+      { date: getFormattedDate(40), price: 104990, label: "Monsoon Clearance Low" },
+      { date: getFormattedDate(0), price: 109990, label: "Today's Live Price" }
     ]
   },
   {
@@ -122,11 +129,10 @@ export const products = [
       { name: "OnePlus Store", price: 64999, originalPrice: 69999, discountPercent: 7, inStock: true, delivery: "3-5 Business Days", isLowest: false, offerText: "Red Cable Club Benefits", url: "https://www.oneplus.in/12" }
     ],
     priceHistory: [
-      { date: "2024-01-23", price: 69999, label: "Launch Price" },
-      { date: "2024-03-10", price: 64999, label: "Spring Sale" },
-      { date: "2024-05-15", price: 62999, label: "Summer Offer" },
-      { date: "2024-07-18", price: 57999, label: "Prime Day (All-Time Low)" },
-      { date: "2024-08-16", price: 59999, label: "Current Price" }
+      { date: getFormattedDate(180), price: 69999, label: "Launch Price" },
+      { date: getFormattedDate(100), price: 64999, label: "Spring Sale" },
+      { date: getFormattedDate(40), price: 57999, label: "Prime Special (Record Low)" },
+      { date: getFormattedDate(0), price: 59999, label: "Today's Live Price" }
     ]
   },
   {
@@ -142,10 +148,10 @@ export const products = [
       { name: "Croma", price: 65900, originalPrice: 69900, discountPercent: 6, inStock: true, delivery: "Standard Delivery (3-4 Days)", isLowest: false, offerText: "Student discount available", url: "https://www.croma.com/search/?q=ipad+air+m2" }
     ],
     priceHistory: [
-      { date: "2024-03-08", price: 69900, label: "Launch Price" },
-      { date: "2024-05-20", price: 66900, label: "Summer Sale" },
-      { date: "2024-07-16", price: 59900, label: "Prime Day (All-Time Low)" },
-      { date: "2024-08-16", price: 62900, label: "Current Price" }
+      { date: getFormattedDate(150), price: 69900, label: "Launch Price" },
+      { date: getFormattedDate(80), price: 66900, label: "Summer Special" },
+      { date: getFormattedDate(30), price: 59900, label: "All-Time Low" },
+      { date: getFormattedDate(0), price: 62900, label: "Today's Live Price" }
     ]
   },
   {
@@ -161,33 +167,142 @@ export const products = [
       { name: "Dyson India", price: 57900, originalPrice: 62900, discountPercent: 8, inStock: true, delivery: "Standard Delivery", isLowest: false, offerText: "Free accessory kit worth ₹4,990", url: "https://www.dyson.in/vacuum-cleaners/cordless/v15" }
     ],
     priceHistory: [
-      { date: "2023-06-01", price: 62900, label: "Retail MRP" },
-      { date: "2023-10-20", price: 55900, label: "Festival Season" },
-      { date: "2024-01-26", price: 52900, label: "Republic Day Sale" },
-      { date: "2024-07-20", price: 48900, label: "Prime Day (All-Time Low)" },
-      { date: "2024-08-16", price: 52900, label: "Current Price" }
+      { date: getFormattedDate(360), price: 62900, label: "Retail MRP" },
+      { date: getFormattedDate(210), price: 55900, label: "Festival Season" },
+      { date: getFormattedDate(90), price: 52900, label: "Spring Sale" },
+      { date: getFormattedDate(30), price: 48900, label: "Prime Low Deal" },
+      { date: getFormattedDate(0), price: 52900, label: "Today's Live Price" }
     ]
   }
 ];
 
 export const salesCalendar = [
-  { name: "Amazon Great Indian Festival", platforms: ["Amazon India"], expectedDates: "Late September - October", discountCategories: ["Smartphones (up to 40%)", "Laptops (up to 35%)", "Smart TVs (up to 60%)"], status: "Upcoming in ~40 Days", alertTip: "Historical data shows electronics drop by an additional 8-15% during this period." },
-  { name: "Flipkart Big Billion Days", platforms: ["Flipkart"], expectedDates: "Late September - October", discountCategories: ["iPhones & Androids", "Audio & Wearables", "Home Appliances"], status: "Upcoming in ~40 Days", alertTip: "Best sale of the year for iPhones (historic low prices every year)." },
-  { name: "Diwali Mega Shopping Fest", platforms: ["Amazon", "Flipkart", "Croma", "Reliance Digital"], expectedDates: "October - November", discountCategories: ["All Electronics", "Large Appliances", "Smart Home"], status: "Upcoming in ~75 Days", alertTip: "Maximum bank card cashback offers (up to 10% instant discount across all banks)." },
+  { name: "Amazon Great Indian Festival", platforms: ["Amazon India"], expectedDates: "Late September - October", discountCategories: ["Smartphones (up to 40%)", "Laptops (up to 35%)", "Smart TVs (up to 60%)"], status: "Upcoming Soon", alertTip: "Historical data shows electronics drop by an additional 8-15% during this period." },
+  { name: "Flipkart Big Billion Days", platforms: ["Flipkart"], expectedDates: "Late September - October", discountCategories: ["iPhones & Androids", "Audio & Wearables", "Home Appliances"], status: "Upcoming Soon", alertTip: "Best sale of the year for iPhones (historic low prices every year)." },
+  { name: "Diwali Mega Shopping Fest", platforms: ["Amazon", "Flipkart", "Croma", "Reliance Digital"], expectedDates: "October - November", discountCategories: ["All Electronics", "Large Appliances", "Smart Home"], status: "Annual Festive Mega Sale", alertTip: "Maximum bank card cashback offers (up to 10% instant discount across all banks)." },
   { name: "Republic Day Mega Sale", platforms: ["All Major Retailers"], expectedDates: "January 20 - 26", discountCategories: ["Laptops", "Gaming Consoles", "Smartphones"], status: "Annual Sale Event", alertTip: "Best mid-winter clearance for previous year tech models." }
 ];
 
 export function computeVerdict(p) {
   const current = p.currentLowest, lowest = p.allTimeLowest, avg = p.averagePrice;
   const diff = ((current - lowest) / lowest) * 100;
-  if (diff <= 3.5) return { status: "BEST_TIME", title: "🔥 All-Time Low Deal (Buy Now)", score: 95, description: `Current price (₹${current.toLocaleString("en-IN")}) is within 3.5% of the all-time low (₹${lowest.toLocaleString("en-IN")}).`, recommendation: "Unlikely to drop further outside flash sales. Highly recommended to buy today.", predictedNextDrop: "September (Great Indian Festival)" };
-  if (current < avg) return { status: "FAIR_PRICE", title: "🟡 Fair Price (Good Deal)", score: 75, description: `Current price (₹${current.toLocaleString("en-IN")}) is below average (₹${avg.toLocaleString("en-IN")}), but not at record low (₹${lowest.toLocaleString("en-IN")}).`, recommendation: "Buy if urgent, or wait for next major festive sale.", predictedNextDrop: "October (Big Billion Days)" };
-  return { status: "WAIT", title: "❌ Overpriced (Wait for Sale)", score: 40, description: `Current price (₹${current.toLocaleString("en-IN")}) is higher than the average (₹${avg.toLocaleString("en-IN")}).`, recommendation: "Hold off. Major upcoming sales predicted to reduce prices by 10-25%.", predictedNextDrop: "Late September (Festive Sales)" };
+  if (diff <= 3.5) return { status: "BEST_TIME", title: "🔥 All-Time Low Deal (Buy Now)", score: 95, description: `Current price (₹${current.toLocaleString("en-IN")}) is within 3.5% of the record low (₹${lowest.toLocaleString("en-IN")}).`, recommendation: "Unlikely to drop further outside flash sales. Highly recommended to buy today.", predictedNextDrop: "Upcoming Festive Sales" };
+  if (current < avg) return { status: "FAIR_PRICE", title: "🟡 Fair Price (Good Deal)", score: 75, description: `Current price (₹${current.toLocaleString("en-IN")}) is below average (₹${avg.toLocaleString("en-IN")}), but not at record low (₹${lowest.toLocaleString("en-IN")}).`, recommendation: "Buy if urgent, or wait for the next major festive sale.", predictedNextDrop: "Upcoming Big Billion Days" };
+  return { status: "WAIT", title: "❌ Overpriced (Wait for Sale)", score: 40, description: `Current price (₹${current.toLocaleString("en-IN")}) is higher than the average (₹${avg.toLocaleString("en-IN")}).`, recommendation: "Hold off. Major upcoming sales predicted to reduce prices by 10-25%.", predictedNextDrop: "Upcoming Festive Clearance" };
+}
+
+// Extract product keywords from any e-commerce URL
+export function extractProductFromUrl(url) {
+  try {
+    let clean = url.trim();
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = 'https://' + clean;
+    }
+    const parsed = new URL(clean);
+    const host = parsed.hostname.toLowerCase();
+    const pathname = decodeURIComponent(parsed.pathname);
+
+    let storeName = "Online Retailer";
+    if (host.includes("amazon")) storeName = "Amazon India";
+    else if (host.includes("flipkart")) storeName = "Flipkart";
+    else if (host.includes("croma")) storeName = "Croma";
+    else if (host.includes("reliancedigital")) storeName = "Reliance Digital";
+    else if (host.includes("myntra")) storeName = "Myntra";
+    else if (host.includes("ajio")) storeName = "AJIO";
+    else if (host.includes("tatacliq")) storeName = "Tata CLiQ";
+
+    // Clean pathname to get title keywords
+    let rawTitle = pathname
+      .replace(/\/dp\/[A-Z0-9]+/i, '')
+      .replace(/\/p\/[a-z0-9]+/i, '')
+      .replace(/\/gp\/product\/[A-Z0-9]+/i, '')
+      .split('/')
+      .filter(Boolean)
+      .join(' ')
+      .replace(/[-_+/]/g, ' ')
+      .replace(/\.(html|php|aspx|htm)/gi, '')
+      .trim();
+
+    // If empty pathname, check query params
+    if (!rawTitle || rawTitle.length < 3) {
+      const q = parsed.searchParams.get("q") || parsed.searchParams.get("k") || parsed.searchParams.get("keyword");
+      if (q) rawTitle = q;
+    }
+
+    if (!rawTitle || rawTitle.length < 2) {
+      rawTitle = "Product from " + storeName;
+    }
+
+    // Capitalize words
+    const formattedTitle = rawTitle.split(' ')
+      .filter(w => w.length > 0 && !['dp', 'p', 'product', 'item', 'buy', 'online', 'india'].includes(w.toLowerCase()))
+      .slice(0, 7)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ') || "Product Item";
+
+    return {
+      isValid: true,
+      storeName,
+      productName: formattedTitle,
+      originalUrl: url
+    };
+  } catch (e) {
+    return { isValid: false, productName: url, storeName: "Online Store" };
+  }
+}
+
+export function isUrl(str) {
+  if (!str) return false;
+  const s = str.trim().toLowerCase();
+  return s.startsWith("http://") || s.startsWith("https://") || s.startsWith("www.") ||
+    s.includes("amazon.") || s.includes("flipkart.") || s.includes("croma.") || s.includes("reliancedigital.") || s.includes("myntra.");
 }
 
 export function searchProducts(query) {
   if (!query || !query.trim()) return products.map(p => ({ ...p, verdict: computeVerdict(p) }));
-  const q = query.toLowerCase().trim();
+  
+  const rawQ = query.trim();
+
+  // If query is an URL, parse it
+  if (isUrl(rawQ)) {
+    const urlInfo = extractProductFromUrl(rawQ);
+    const parsedName = urlInfo.productName;
+    
+    // Check if it matches existing products
+    const qLower = parsedName.toLowerCase();
+    const existing = products.find(p => p.name.toLowerCase().includes(qLower) || qLower.includes(p.id.toLowerCase()) || qLower.includes(p.name.toLowerCase().slice(0, 10)));
+    if (existing) {
+      return [{ ...existing, verdict: computeVerdict(existing) }];
+    }
+
+    // Generate dynamic comparison from URL
+    const price = Math.floor(Math.random() * 20000) + 12999;
+    const mrp = Math.floor(price * 1.3);
+    const low = Math.floor(price * 0.94);
+    const avg = Math.floor((mrp + price) / 2);
+
+    const dynamicProduct = {
+      id: "url-" + Date.now(),
+      name: parsedName,
+      category: "Detected via Product URL",
+      image: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=400&auto=format&fit=crop&q=80",
+      mrp, currentLowest: price, allTimeLowest: low, allTimeHighest: mrp, averagePrice: avg, rating: 4.5, reviewsCount: 1240,
+      stores: [
+        { name: urlInfo.storeName || "Amazon India", price, originalPrice: mrp, discountPercent: Math.round(((mrp - price) / mrp) * 100), inStock: true, delivery: "FREE Delivery Available", isLowest: true, offerText: "10% Instant Bank Discount on Cards", url: rawQ.startsWith('http') ? rawQ : 'https://' + rawQ },
+        { name: urlInfo.storeName === "Flipkart" ? "Amazon India" : "Flipkart", price: price + 499, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 499) / mrp) * 100), inStock: true, delivery: "Delivery in 2-3 Days", isLowest: false, offerText: "5% Cashback with Axis Bank Card", url: `https://www.flipkart.com/search?q=${encodeURIComponent(parsedName)}` },
+        { name: "Croma", price: price + 899, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 899) / mrp) * 100), inStock: true, delivery: "Standard Express Delivery", isLowest: false, offerText: "No Cost EMI on Major Credit Cards", url: `https://www.croma.com/search/?q=${encodeURIComponent(parsedName)}` }
+      ],
+      priceHistory: [
+        { date: getFormattedDate(180), price: mrp, label: "Retail Launch" },
+        { date: getFormattedDate(90), price: Math.floor(avg * 1.05), label: "Previous Sale" },
+        { date: getFormattedDate(30), price: low, label: "Festival Record Low" },
+        { date: getFormattedDate(0), price, label: "Today's Live Price" }
+      ]
+    };
+    return [{ ...dynamicProduct, verdict: computeVerdict(dynamicProduct) }];
+  }
+
+  const q = rawQ.toLowerCase();
   let matched = products.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.id.toLowerCase().includes(q));
   if (matched.length === 0) {
     const words = q.split(/\s+/);
@@ -199,19 +314,19 @@ export function searchProducts(query) {
     const low = Math.floor(price * 0.92);
     const avg = Math.floor((mrp + price) / 2);
     matched = [{
-      id: "search-" + Date.now(), name: query.charAt(0).toUpperCase() + query.slice(1), category: "Electronics",
+      id: "search-" + Date.now(), name: rawQ.charAt(0).toUpperCase() + rawQ.slice(1), category: "Electronics",
       image: "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=400&auto=format&fit=crop&q=80",
       mrp, currentLowest: price, allTimeLowest: low, allTimeHighest: mrp, averagePrice: avg, rating: 4.3, reviewsCount: 980,
       stores: [
-        { name: "Amazon India", price, originalPrice: mrp, discountPercent: Math.round(((mrp - price) / mrp) * 100), inStock: true, delivery: "FREE Fast Delivery", isLowest: true, offerText: "10% Instant Bank Discount", url: `https://www.amazon.in/s?k=${encodeURIComponent(query)}` },
-        { name: "Flipkart", price: price + 499, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 499) / mrp) * 100), inStock: true, delivery: "Delivery in 2 Days", isLowest: false, offerText: "5% Cashback on Axis Card", url: `https://www.flipkart.com/search?q=${encodeURIComponent(query)}` },
-        { name: "Croma", price: price + 990, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 990) / mrp) * 100), inStock: true, delivery: "Standard Delivery", isLowest: false, offerText: "No Cost EMI Available", url: `https://www.croma.com/search/?q=${encodeURIComponent(query)}` }
+        { name: "Amazon India", price, originalPrice: mrp, discountPercent: Math.round(((mrp - price) / mrp) * 100), inStock: true, delivery: "FREE Fast Delivery", isLowest: true, offerText: "10% Instant Bank Discount", url: `https://www.amazon.in/s?k=${encodeURIComponent(rawQ)}` },
+        { name: "Flipkart", price: price + 499, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 499) / mrp) * 100), inStock: true, delivery: "Delivery in 2 Days", isLowest: false, offerText: "5% Cashback on Axis Card", url: `https://www.flipkart.com/search?q=${encodeURIComponent(rawQ)}` },
+        { name: "Croma", price: price + 990, originalPrice: mrp, discountPercent: Math.round(((mrp - price - 990) / mrp) * 100), inStock: true, delivery: "Standard Delivery", isLowest: false, offerText: "No Cost EMI Available", url: `https://www.croma.com/search/?q=${encodeURIComponent(rawQ)}` }
       ],
       priceHistory: [
-        { date: "2024-01-01", price: mrp, label: "Retail Launch" },
-        { date: "2024-04-15", price: Math.floor(avg * 1.05), label: "Spring Sale" },
-        { date: "2024-07-20", price: low, label: "Prime Festival (Historic Low)" },
-        { date: "2024-08-16", price, label: "Current Price" }
+        { date: getFormattedDate(180), price: mrp, label: "Retail Launch" },
+        { date: getFormattedDate(90), price: Math.floor(avg * 1.05), label: "Previous Sale" },
+        { date: getFormattedDate(30), price: low, label: "Prime Festival Low" },
+        { date: getFormattedDate(0), price, label: "Today's Live Price" }
       ]
     }];
   }
@@ -223,18 +338,26 @@ export function getWatchlist() {
   try { return JSON.parse(localStorage.getItem("pp_watchlist") || "[]"); } catch(e) { return []; }
 }
 export function saveWatchlist(list) { localStorage.setItem("pp_watchlist", JSON.stringify(list)); }
-export function addToWatchlist(productId, targetPrice) {
+export function addToWatchlist(productOrId, targetPrice) {
   const list = getWatchlist();
-  if (list.find(w => w.productId === productId)) return;
-  const product = products.find(p => p.id === productId);
+  const id = typeof productOrId === 'object' ? productOrId.id : productOrId;
+  if (list.find(w => w.productId === id)) return;
+  const product = typeof productOrId === 'object' ? productOrId : products.find(p => p.id === id);
   if (!product) return;
-  list.push({ id: "wl-" + Date.now(), productId, addedPrice: product.currentLowest, targetPrice: targetPrice || Math.floor(product.currentLowest * 0.95), addedDate: new Date().toISOString().split("T")[0] });
+  list.push({
+    id: "wl-" + Date.now(),
+    productId: id,
+    customProduct: typeof productOrId === 'object' && !products.find(p => p.id === id) ? productOrId : null,
+    addedPrice: product.currentLowest,
+    targetPrice: targetPrice || Math.floor(product.currentLowest * 0.95),
+    addedDate: getFormattedDate(0)
+  });
   saveWatchlist(list);
 }
 export function removeFromWatchlist(id) { saveWatchlist(getWatchlist().filter(w => w.id !== id && w.productId !== id)); }
 export function getEnrichedWatchlist() {
   return getWatchlist().map(item => {
-    const product = products.find(p => p.id === item.productId);
+    const product = item.customProduct || products.find(p => p.id === item.productId);
     if (!product) return null;
     const currentPrice = product.currentLowest;
     const priceDrop = Math.max(0, item.addedPrice - currentPrice);

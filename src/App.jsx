@@ -1,21 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import {
-  searchProducts, salesCalendar, computeVerdict,
-  getWatchlist, getEnrichedWatchlist, addToWatchlist, removeFromWatchlist
+  products as defaultProducts,
+  searchProducts,
+  salesCalendar,
+  computeVerdict,
+  getWatchlist,
+  getEnrichedWatchlist,
+  addToWatchlist,
+  removeFromWatchlist,
+  getFormattedDate,
+  isUrl,
+  extractProductFromUrl
 } from './data.js';
 
 function SearchIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>; }
-function TrendingDownIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>; }
-function BellIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>; }
-function CalendarIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>; }
+function LinkIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>; }
 function ZapIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill={p.fill||"none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>; }
 function ExternalLinkIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>; }
 function ChevronRightIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>; }
 function ArrowLeftIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>; }
-function CheckIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>; }
 function Trash2Icon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>; }
-function ArrowDownRightIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7 7 10 10"/><path d="M17 7v10H7"/></svg>; }
+function XIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>; }
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('search');
@@ -24,6 +30,13 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [watchlist, setWatchlist] = useState([]);
   const [watchlistToast, setWatchlistToast] = useState(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [isUrlMode, setIsUrlMode] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+
+  const searchBoxRef = useRef(null);
+  const todayFormatted = getFormattedDate(0);
 
   useEffect(() => {
     try {
@@ -31,13 +44,41 @@ export default function App() {
       setResults(r);
       if (r.length > 0) setSelectedProduct(r[0]);
       setWatchlist(getEnrichedWatchlist());
+      setSuggestions(defaultProducts.slice(0, 5));
     } catch (err) {
       console.error('Init error:', err);
     }
   }, []);
 
+  // Update suggestions dynamically as query changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions(defaultProducts.slice(0, 5));
+    } else {
+      const q = searchQuery.toLowerCase().trim();
+      const filtered = defaultProducts.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.id.toLowerCase().includes(q)
+      );
+      setSuggestions(filtered.length > 0 ? filtered : defaultProducts.slice(0, 3));
+    }
+  }, [searchQuery]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleSearch = (e) => {
     if (e) e.preventDefault();
+    setShowSuggestions(false);
     try {
       const r = searchProducts(searchQuery);
       setResults(r);
@@ -47,8 +88,16 @@ export default function App() {
     }
   };
 
+  const handleSelectSuggestion = (p) => {
+    setSearchQuery(p.name);
+    setShowSuggestions(false);
+    setSelectedProduct({ ...p, verdict: computeVerdict(p) });
+    setResults([ { ...p, verdict: computeVerdict(p) } ]);
+  };
+
   const handleChipClick = (q) => {
     setSearchQuery(q);
+    setShowSuggestions(false);
     try {
       const r = searchProducts(q);
       setResults(r);
@@ -58,8 +107,23 @@ export default function App() {
     }
   };
 
+  const handleUrlSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!urlInput.trim()) return;
+    try {
+      const r = searchProducts(urlInput);
+      setResults(r);
+      if (r.length > 0) setSelectedProduct(r[0]);
+      setIsUrlMode(false);
+      setUrlInput('');
+      setSearchQuery('');
+    } catch (err) {
+      console.error('URL parse error:', err);
+    }
+  };
+
   const handleAddToWatchlist = (product) => {
-    addToWatchlist(product.id, Math.floor(product.currentLowest * 0.95));
+    addToWatchlist(product, Math.floor(product.currentLowest * 0.95));
     setWatchlist(getEnrichedWatchlist());
     setWatchlistToast('Added to watchlist!');
     setTimeout(() => setWatchlistToast(null), 3500);
@@ -116,7 +180,7 @@ export default function App() {
         <p style={{ fontSize: '0.82rem', lineHeight: 1.45, marginBottom: '0.5rem' }}>{verdict.description}</p>
         <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.5rem 0.75rem', borderRadius: '10px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
           <div><strong>💡 Recommendation:</strong> {verdict.recommendation}</div>
-          {verdict.predictedNextDrop && <div><strong>📅 Next Price Drop:</strong> {verdict.predictedNextDrop}</div>}
+          {verdict.predictedNextDrop && <div><strong>📅 Predicted Next Drop:</strong> {verdict.predictedNextDrop}</div>}
         </div>
       </div>
     );
@@ -132,9 +196,27 @@ export default function App() {
           <div className="logo-badge"><ZapIcon size={22} fill="white" /></div>
           <div>
             <div className="logo-text">PricePulse</div>
-            <div className="logo-sub">India Price Tracker</div>
+            <div className="logo-sub">Live Price Intelligence • {todayFormatted}</div>
           </div>
         </div>
+        <button
+          onClick={() => setIsUrlMode(!isUrlMode)}
+          style={{
+            background: isUrlMode ? 'var(--brand-primary)' : 'rgba(56,189,248,0.12)',
+            border: '1px solid rgba(56,189,248,0.3)',
+            color: isUrlMode ? '#fff' : '#38bdf8',
+            padding: '0.35rem 0.65rem',
+            borderRadius: '100px',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem'
+          }}>
+          <LinkIcon size={14} />
+          <span>{isUrlMode ? 'Search Mode' : 'Paste URL'}</span>
+        </button>
       </header>
 
       {/* Toast */}
@@ -148,15 +230,123 @@ export default function App() {
         {/* SEARCH TAB */}
         {activeTab === 'search' && (
           <div>
-            <form onSubmit={handleSearch} className="search-container">
-              <div className="search-input-wrapper">
-                <SearchIcon size={18} color="var(--text-muted)" />
-                <input type="text" className="search-input" placeholder="Search product name..."
-                  value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                <button type="submit" className="search-btn">Search</button>
-              </div>
-            </form>
+            {/* URL Paste Mode Banner */}
+            {isUrlMode ? (
+              <form onSubmit={handleUrlSubmit} className="card" style={{ marginBottom: '1rem', border: '1.5px solid #38bdf8', background: 'rgba(56,189,248,0.05)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <LinkIcon size={16} /> Paste Product URL to Track
+                  </div>
+                  <button type="button" onClick={() => setIsUrlMode(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    <XIcon size={16} />
+                  </button>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                  Paste any Amazon, Flipkart, Croma, or Reliance Digital link:
+                </p>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="url"
+                    placeholder="https://www.amazon.in/dp/... or flipkart.com/..."
+                    value={urlInput}
+                    onChange={e => setUrlInput(e.target.value)}
+                    style={{
+                      flex: 1,
+                      background: 'var(--bg-surface-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '8px',
+                      padding: '0.6rem 0.8rem',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.82rem',
+                      outline: 'none'
+                    }}
+                    autoFocus
+                  />
+                  <button type="submit" className="search-btn" style={{ whiteSpace: 'nowrap' }}>
+                    Track Link
+                  </button>
+                </div>
+              </form>
+            ) : (
+              /* Search Input with Autocomplete Suggestions Dropdown */
+              <div ref={searchBoxRef} style={{ position: 'relative', marginBottom: '1rem' }}>
+                <form onSubmit={handleSearch} className="search-container" style={{ margin: 0 }}>
+                  <div className="search-input-wrapper">
+                    <SearchIcon size={18} color="var(--text-muted)" />
+                    <input
+                      type="text"
+                      className="search-input"
+                      placeholder="Search product name or paste URL..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      onFocus={() => setShowSuggestions(true)}
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => { setSearchQuery(''); setShowSuggestions(false); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.2rem' }}>
+                        <XIcon size={15} />
+                      </button>
+                    )}
+                    <button type="submit" className="search-btn">Search</button>
+                  </div>
+                </form>
 
+                {/* Suggestions Dropdown */}
+                {showSuggestions && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 4px)',
+                    left: 0,
+                    right: 0,
+                    background: 'var(--bg-surface)',
+                    border: '1.5px solid var(--border-subtle)',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                    zIndex: 200,
+                    overflow: 'hidden',
+                    maxHeight: '280px',
+                    overflowY: 'auto'
+                  }}>
+                    <div style={{ padding: '0.4rem 0.75rem', fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-surface-elevated)' }}>
+                      {searchQuery.trim() ? 'Matching Products' : '🔥 Popular Tech Deals'}
+                    </div>
+                    {suggestions.map(p => (
+                      <div
+                        key={p.id}
+                        onClick={() => handleSelectSuggestion(p)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.65rem 0.75rem',
+                          borderBottom: '1px solid var(--border-subtle)',
+                          cursor: 'pointer',
+                          transition: 'background 0.15s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-surface-elevated)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                        <img src={p.image} alt="" style={{ width: 34, height: 34, borderRadius: 6, objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {p.name}
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#38bdf8' }}>
+                            {p.category}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--status-emerald)', fontFamily: 'var(--font-mono)' }}>
+                          ₹{fmt(p.currentLowest)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Quick Filter Chips */}
             <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.6rem', marginBottom: '1rem' }}>
               {['iPhone 15', 'Sony XM5', 'MacBook Air', 'Samsung S24', 'LG OLED', 'OnePlus 12', 'iPad Air', 'Dyson'].map(k => (
                 <button key={k} onClick={() => handleChipClick(k)} style={{
@@ -293,14 +483,17 @@ export default function App() {
             <VerdictBanner verdict={selectedProduct.verdict} />
             <div className="chart-container">
               <div className="chart-stats-grid">
-                <div className="stat-box"><div className="stat-label">All-Time Low</div><div className="stat-value lowest">₹{fmt(selectedProduct.allTimeLowest)}</div></div>
+                <div className="stat-box"><div className="stat-label">Record Low</div><div className="stat-value lowest">₹{fmt(selectedProduct.allTimeLowest)}</div></div>
                 <div className="stat-box"><div className="stat-label">Average</div><div className="stat-value avg">₹{fmt(selectedProduct.averagePrice)}</div></div>
-                <div className="stat-box"><div className="stat-label">All-Time High</div><div className="stat-value highest">₹{fmt(selectedProduct.allTimeHighest)}</div></div>
+                <div className="stat-box"><div className="stat-label">Launch MRP</div><div className="stat-value highest">₹{fmt(selectedProduct.allTimeHighest)}</div></div>
               </div>
               {renderChart(selectedProduct.priceHistory, selectedProduct.allTimeLowest)}
             </div>
             <div className="card" style={{ marginTop: '1rem' }}>
-              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.75rem' }}>Sale Event Timeline</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h4 style={{ fontSize: '0.88rem', fontWeight: 700 }}>Price Timeline</h4>
+                <span style={{ fontSize: '0.7rem', color: '#38bdf8' }}>Today: {todayFormatted}</span>
+              </div>
               {selectedProduct.priceHistory && selectedProduct.priceHistory.map((h, i) => (
                 <div key={i} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -325,14 +518,14 @@ export default function App() {
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Product Watchlist</h2>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Price drop monitor</p>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Real-time price drop tracker as of {todayFormatted}</p>
             </div>
             {watchlist.length === 0 ? (
               <div className="card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
                 <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔔</div>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Watchlist is Empty</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                  Search any product and tap "Track Price" to monitor drops!
+                  Search any product or paste an Amazon/Flipkart URL and tap "Track Price"!
                 </p>
               </div>
             ) : watchlist.map(w => (
@@ -374,7 +567,7 @@ export default function App() {
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Upcoming Indian Sales</h2>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Festival discount dates & predictions</p>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Festival discount dates & savings tips</p>
             </div>
             {salesCalendar.map((s, i) => (
               <div key={i} className="card" style={{ marginBottom: '0.85rem' }}>
