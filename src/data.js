@@ -1,5 +1,5 @@
 // Embedded product database - works fully offline
-// Dynamic real-time date calculation & URL parsing
+// Dynamic real-time date calculation, Loot Deals Engine & Notification System
 
 export function getTodayDateStr() {
   const d = new Date();
@@ -11,6 +11,110 @@ export function getFormattedDate(offsetDays = 0) {
   d.setDate(d.getDate() - offsetDays);
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+
+// ─── Heavy Price Drop "Loot Deals" ───
+export const lootDeals = [
+  {
+    id: "loot-sony-wh1000xm4",
+    title: "Sony WH-1000XM4 ANC Headphones",
+    store: "Amazon India",
+    category: "Audio",
+    image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&auto=format&fit=crop&q=80",
+    dealPrice: 16990,
+    regularPrice: 29990,
+    mrp: 32990,
+    discountPercent: 48,
+    priceDropAmount: 13000,
+    dropReason: "⚡ Lightning Deal (Seller Glitch Discount)",
+    tag: "🔥 48% OFF LOOT",
+    urgency: "HIGH",
+    claimedPercent: 88,
+    timeLeftMinutes: 24,
+    url: "https://www.amazon.in/s?k=sony+wh1000xm4",
+    addedTime: "5 mins ago",
+    badge: "PRICE CRASH"
+  },
+  {
+    id: "loot-apple-watch-s9",
+    title: "Apple Watch Series 9 GPS 45mm",
+    store: "Flipkart",
+    category: "Wearables",
+    image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=400&auto=format&fit=crop&q=80",
+    dealPrice: 29999,
+    regularPrice: 44900,
+    mrp: 44900,
+    discountPercent: 33,
+    priceDropAmount: 14901,
+    dropReason: "⚡ Bank Offer Stack + Exchange Bonus",
+    tag: "🚨 RECORD LOW",
+    urgency: "CRITICAL",
+    claimedPercent: 94,
+    timeLeftMinutes: 12,
+    url: "https://www.flipkart.com/search?q=apple+watch+series+9",
+    addedTime: "12 mins ago",
+    badge: "HISTORIC LOW"
+  },
+  {
+    id: "loot-samsung-55-oled",
+    title: "Samsung 55\" Crystal 4K UHD Smart TV",
+    store: "Reliance Digital",
+    category: "Smart TVs",
+    image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&auto=format&fit=crop&q=80",
+    dealPrice: 38990,
+    regularPrice: 68900,
+    mrp: 72900,
+    discountPercent: 47,
+    priceDropAmount: 29910,
+    dropReason: "⚡ Clearance Flash Sale (Limited 15 Units)",
+    tag: "💥 FLAT ₹29,910 OFF",
+    urgency: "HIGH",
+    claimedPercent: 78,
+    timeLeftMinutes: 45,
+    url: "https://www.reliancedigital.in/search?q=samsung+55+inch+4k+tv",
+    addedTime: "18 mins ago",
+    badge: "CLEARANCE"
+  },
+  {
+    id: "loot-macbook-air-m1",
+    title: "Apple MacBook Air M1 (256GB SSD, Space Grey)",
+    store: "Amazon India",
+    category: "Laptops",
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&auto=format&fit=crop&q=80",
+    dealPrice: 58990,
+    regularPrice: 79900,
+    mrp: 92900,
+    discountPercent: 37,
+    priceDropAmount: 20910,
+    dropReason: "⚡ Coupon Applied + HDFC Instant Discount",
+    tag: "🔥 UNDER ₹59K LOOT",
+    urgency: "CRITICAL",
+    claimedPercent: 91,
+    timeLeftMinutes: 19,
+    url: "https://www.amazon.in/s?k=macbook+air+m1",
+    addedTime: "25 mins ago",
+    badge: "MEGA DROP"
+  },
+  {
+    id: "loot-dyson-airwrap",
+    title: "Dyson Airwrap Multi-Styler Complete Long",
+    store: "Croma",
+    category: "Appliances",
+    image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80",
+    dealPrice: 37990,
+    regularPrice: 49900,
+    mrp: 49900,
+    discountPercent: 24,
+    priceDropAmount: 11910,
+    dropReason: "⚡ Night Owl Flash Discount + Card Cashback",
+    tag: "⚡ RARE DEAL",
+    urgency: "MEDIUM",
+    claimedPercent: 65,
+    timeLeftMinutes: 58,
+    url: "https://www.croma.com/search/?q=dyson+airwrap",
+    addedTime: "30 mins ago",
+    badge: "LIMITED STOCK"
+  }
+];
 
 export const products = [
   {
@@ -191,7 +295,50 @@ export function computeVerdict(p) {
   return { status: "WAIT", title: "❌ Overpriced (Wait for Sale)", score: 40, description: `Current price (₹${current.toLocaleString("en-IN")}) is higher than the average (₹${avg.toLocaleString("en-IN")}).`, recommendation: "Hold off. Major upcoming sales predicted to reduce prices by 10-25%.", predictedNextDrop: "Upcoming Festive Clearance" };
 }
 
-// Extract product keywords from any e-commerce URL
+// ─── Notification Dispatcher ───
+export async function sendLootNotification(title, body, data = {}) {
+  // Haptic feedback
+  if (navigator.vibrate) {
+    navigator.vibrate([150, 80, 150, 80, 300]);
+  }
+
+  // Native Capacitor Local Notifications
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    const perm = await LocalNotifications.checkPermissions();
+    if (perm.display !== 'granted') {
+      await LocalNotifications.requestPermissions();
+    }
+    await LocalNotifications.schedule({
+      notifications: [
+        {
+          title: title || "🚨 LOOT DEAL ALERT!",
+          body: body || "Massive price drop detected!",
+          id: Math.floor(Math.random() * 100000),
+          sound: 'default',
+          extra: data
+        }
+      ]
+    });
+    return true;
+  } catch (e) {
+    // Fallback to browser Notification API
+    if ("Notification" in window) {
+      if (Notification.permission === "granted") {
+        new Notification(title, { body, icon: "https://img.icons8.com/color/96/lightning-bolt.png" });
+        return true;
+      } else if (Notification.permission !== "denied") {
+        const p = await Notification.requestPermission();
+        if (p === "granted") {
+          new Notification(title, { body, icon: "https://img.icons8.com/color/96/lightning-bolt.png" });
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 export function extractProductFromUrl(url) {
   try {
     let clean = url.trim();
@@ -211,7 +358,6 @@ export function extractProductFromUrl(url) {
     else if (host.includes("ajio")) storeName = "AJIO";
     else if (host.includes("tatacliq")) storeName = "Tata CLiQ";
 
-    // Clean pathname to get title keywords
     let rawTitle = pathname
       .replace(/\/dp\/[A-Z0-9]+/i, '')
       .replace(/\/p\/[a-z0-9]+/i, '')
@@ -223,7 +369,6 @@ export function extractProductFromUrl(url) {
       .replace(/\.(html|php|aspx|htm)/gi, '')
       .trim();
 
-    // If empty pathname, check query params
     if (!rawTitle || rawTitle.length < 3) {
       const q = parsed.searchParams.get("q") || parsed.searchParams.get("k") || parsed.searchParams.get("keyword");
       if (q) rawTitle = q;
@@ -233,7 +378,6 @@ export function extractProductFromUrl(url) {
       rawTitle = "Product from " + storeName;
     }
 
-    // Capitalize words
     const formattedTitle = rawTitle.split(' ')
       .filter(w => w.length > 0 && !['dp', 'p', 'product', 'item', 'buy', 'online', 'india'].includes(w.toLowerCase()))
       .slice(0, 7)
@@ -263,19 +407,16 @@ export function searchProducts(query) {
   
   const rawQ = query.trim();
 
-  // If query is an URL, parse it
   if (isUrl(rawQ)) {
     const urlInfo = extractProductFromUrl(rawQ);
     const parsedName = urlInfo.productName;
     
-    // Check if it matches existing products
     const qLower = parsedName.toLowerCase();
     const existing = products.find(p => p.name.toLowerCase().includes(qLower) || qLower.includes(p.id.toLowerCase()) || qLower.includes(p.name.toLowerCase().slice(0, 10)));
     if (existing) {
       return [{ ...existing, verdict: computeVerdict(existing) }];
     }
 
-    // Generate dynamic comparison from URL
     const price = Math.floor(Math.random() * 20000) + 12999;
     const mrp = Math.floor(price * 1.3);
     const low = Math.floor(price * 0.94);
@@ -333,7 +474,7 @@ export function searchProducts(query) {
   return matched.map(p => ({ ...p, verdict: computeVerdict(p) }));
 }
 
-// Watchlist (localStorage)
+// Watchlist
 export function getWatchlist() {
   try { return JSON.parse(localStorage.getItem("pp_watchlist") || "[]"); } catch(e) { return []; }
 }

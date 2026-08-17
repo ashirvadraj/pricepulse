@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './index.css';
 import {
   products as defaultProducts,
+  lootDeals as initialLootDeals,
   searchProducts,
   salesCalendar,
   computeVerdict,
@@ -10,21 +11,24 @@ import {
   addToWatchlist,
   removeFromWatchlist,
   getFormattedDate,
-  isUrl,
-  extractProductFromUrl
+  sendLootNotification,
+  isUrl
 } from './data.js';
 
 function SearchIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>; }
 function LinkIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>; }
 function ZapIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill={p.fill||"none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>; }
+function FlameIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill={p.fill||"none"} stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>; }
+function BellIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>; }
 function ExternalLinkIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>; }
 function ChevronRightIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke={p.color||"currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>; }
 function ArrowLeftIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>; }
 function Trash2Icon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>; }
 function XIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>; }
+function ClockIcon(p) { return <svg xmlns="http://www.w3.org/2000/svg" width={p.size||20} height={p.size||20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>; }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('search');
+  const [activeTab, setActiveTab] = useState('loot');
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -34,6 +38,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState([]);
   const [isUrlMode, setIsUrlMode] = useState(false);
   const [urlInput, setUrlInput] = useState('');
+  const [lootList, setLootList] = useState(initialLootDeals);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   const searchBoxRef = useRef(null);
   const todayFormatted = getFormattedDate(0);
@@ -50,7 +56,7 @@ export default function App() {
     }
   }, []);
 
-  // Update suggestions dynamically as query changes
+  // Update suggestions dynamically
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSuggestions(defaultProducts.slice(0, 5));
@@ -65,7 +71,7 @@ export default function App() {
     }
   }, [searchQuery]);
 
-  // Close suggestions when clicking outside
+  // Click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(e) {
       if (searchBoxRef.current && !searchBoxRef.current.contains(e.target)) {
@@ -125,7 +131,7 @@ export default function App() {
   const handleAddToWatchlist = (product) => {
     addToWatchlist(product, Math.floor(product.currentLowest * 0.95));
     setWatchlist(getEnrichedWatchlist());
-    setWatchlistToast('Added to watchlist!');
+    setWatchlistToast('Added to watchlist! You will be alerted on price drop.');
     setTimeout(() => setWatchlistToast(null), 3500);
   };
 
@@ -135,6 +141,17 @@ export default function App() {
   };
 
   const isWatchlisted = selectedProduct && getWatchlist().some(w => w.productId === selectedProduct.id);
+
+  // Trigger test notification
+  const handleTriggerLootAlert = async (deal) => {
+    const d = deal || lootList[0];
+    const title = `🚨 LOOT DEAL: ${d.title.slice(0, 24)}...`;
+    const body = `💥 Massive ₹${d.priceDropAmount.toLocaleString('en-IN')} Price Drop on ${d.store}! Now ₹${d.dealPrice.toLocaleString('en-IN')} (${d.discountPercent}% OFF)`;
+    
+    await sendLootNotification(title, body);
+    setWatchlistToast(`🔔 Loot Notification sent: "${d.title.slice(0, 20)}..."`);
+    setTimeout(() => setWatchlistToast(null), 4000);
+  };
 
   const renderChart = (history, allTimeLowest) => {
     if (!history || history.length === 0) return null;
@@ -196,38 +213,249 @@ export default function App() {
           <div className="logo-badge"><ZapIcon size={22} fill="white" /></div>
           <div>
             <div className="logo-text">PricePulse</div>
-            <div className="logo-sub">Live Price Intelligence • {todayFormatted}</div>
+            <div className="logo-sub">Live Price Drops • {todayFormatted}</div>
           </div>
         </div>
-        <button
-          onClick={() => setIsUrlMode(!isUrlMode)}
-          style={{
-            background: isUrlMode ? 'var(--brand-primary)' : 'rgba(56,189,248,0.12)',
-            border: '1px solid rgba(56,189,248,0.3)',
-            color: isUrlMode ? '#fff' : '#38bdf8',
-            padding: '0.35rem 0.65rem',
-            borderRadius: '100px',
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.35rem'
-          }}>
-          <LinkIcon size={14} />
-          <span>{isUrlMode ? 'Search Mode' : 'Paste URL'}</span>
-        </button>
+        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+          <button
+            onClick={() => handleTriggerLootAlert()}
+            title="Test Loot Notification on Device"
+            style={{
+              background: 'linear-gradient(135deg, #ef4444, #f97316)',
+              border: 'none',
+              color: '#fff',
+              padding: '0.35rem 0.65rem',
+              borderRadius: '100px',
+              fontSize: '0.72rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem',
+              boxShadow: '0 0 12px rgba(239,68,68,0.4)'
+            }}>
+            <FlameIcon size={13} fill="#fff" />
+            <span>Alert Me</span>
+          </button>
+          <button
+            onClick={() => { setIsUrlMode(!isUrlMode); if (!isUrlMode) setActiveTab('search'); }}
+            style={{
+              background: isUrlMode ? 'var(--brand-primary)' : 'rgba(56,189,248,0.12)',
+              border: '1px solid rgba(56,189,248,0.3)',
+              color: isUrlMode ? '#fff' : '#38bdf8',
+              padding: '0.35rem 0.6rem',
+              borderRadius: '100px',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}>
+            <LinkIcon size={13} />
+            <span>URL</span>
+          </button>
+        </div>
       </header>
 
       {/* Toast */}
       {watchlistToast && (
-        <div style={{ background: 'var(--status-emerald)', color: '#022c22', padding: '0.75rem 1rem', fontSize: '0.82rem', fontWeight: 700, textAlign: 'center' }}>
-          ✓ {watchlistToast}
+        <div style={{
+          background: 'linear-gradient(135deg, #059669, #10b981)',
+          color: '#ffffff',
+          padding: '0.75rem 1rem',
+          fontSize: '0.82rem',
+          fontWeight: 700,
+          textAlign: 'center',
+          boxShadow: '0 4px 15px rgba(16,185,129,0.3)'
+        }}>
+          {watchlistToast}
         </div>
       )}
 
       <main className="main-content">
-        {/* SEARCH TAB */}
+        {/* ─── TAB: LOOT DEALS (HEAVY PRICE DROPS) ─── */}
+        {activeTab === 'loot' && (
+          <div>
+            {/* Loot Header Banner */}
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(249,115,22,0.1))',
+              border: '1.5px solid rgba(239,68,68,0.35)',
+              borderRadius: '14px',
+              padding: '1rem',
+              marginBottom: '1.25rem',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(239,68,68,0.2)', color: '#f87171', padding: '0.2rem 0.6rem', borderRadius: '100px', fontSize: '0.68rem', fontWeight: 900, marginBottom: '0.4rem' }}>
+                    <FlameIcon size={12} fill="#f87171" color="#f87171" /> LIVE LOOT RADAR
+                  </div>
+                  <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                    Instant Heavy Price Drops
+                  </h2>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+                    Glitch deals & flash drops up to 60% OFF tracked in real-time
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleTriggerLootAlert()}
+                  style={{
+                    background: 'rgba(239,68,68,0.15)',
+                    border: '1px solid rgba(239,68,68,0.4)',
+                    color: '#fca5a5',
+                    padding: '0.4rem 0.7rem',
+                    borderRadius: '10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0.15rem'
+                  }}>
+                  <BellIcon size={15} />
+                  <span>Test Push</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Loot Deals Grid / Cards */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {lootList.map(deal => (
+                <div key={deal.id} className="card" style={{
+                  border: '1.5px solid rgba(239,68,68,0.25)',
+                  background: 'linear-gradient(180deg, #10172a, #151d34)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  {/* Badge */}
+                  <div style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    color: '#fff',
+                    fontSize: '0.65rem',
+                    fontWeight: 900,
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '100px',
+                    boxShadow: '0 2px 8px rgba(239,68,68,0.4)'
+                  }}>
+                    {deal.tag}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start', paddingRight: '4rem' }}>
+                    <img src={deal.image} alt={deal.title}
+                      style={{ width: 75, height: 75, borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--border-subtle)' }}
+                      onError={e => { e.target.style.display = 'none'; }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.15rem' }}>
+                        {deal.store} • {deal.addedTime}
+                      </div>
+                      <h3 style={{ fontSize: '0.92rem', fontWeight: 800, lineHeight: 1.3, color: '#fff' }}>
+                        {deal.title}
+                      </h3>
+                      <div style={{ fontSize: '0.72rem', color: '#f87171', fontWeight: 700, marginTop: '0.25rem' }}>
+                        {deal.dropReason}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Row */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: '0.6rem',
+                    marginTop: '0.75rem',
+                    paddingTop: '0.6rem',
+                    borderTop: '1px solid var(--border-subtle)'
+                  }}>
+                    <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--status-emerald)', fontFamily: 'var(--font-mono)' }}>
+                      ₹{fmt(deal.dealPrice)}
+                    </span>
+                    <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
+                      ₹{fmt(deal.regularPrice)}
+                    </span>
+                    <span style={{
+                      background: 'rgba(239,68,68,0.15)',
+                      color: '#f87171',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '100px'
+                    }}>
+                      Save ₹{fmt(deal.priceDropAmount)}
+                    </span>
+                  </div>
+
+                  {/* Stock & Timer Bar */}
+                  <div style={{ marginTop: '0.75rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-secondary)', marginBottom: '0.3rem' }}>
+                      <span>🔥 <strong>{deal.claimedPercent}% claimed</strong></span>
+                      <span style={{ color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+                        <ClockIcon size={12} /> {deal.timeLeftMinutes}m left
+                      </span>
+                    </div>
+                    <div style={{ height: '6px', background: 'var(--bg-surface-elevated)', borderRadius: '100px', overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${deal.claimedPercent}%`,
+                        height: '100%',
+                        background: 'linear-gradient(90deg, #f97316, #ef4444)',
+                        borderRadius: '100px'
+                      }} />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.85rem' }}>
+                    <a
+                      href={deal.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        flex: 1,
+                        background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+                        color: '#fff',
+                        padding: '0.65rem',
+                        borderRadius: '10px',
+                        fontSize: '0.82rem',
+                        fontWeight: 800,
+                        textAlign: 'center',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.35rem'
+                      }}>
+                      Grab Deal on {deal.store.split(' ')[0]} <ExternalLinkIcon size={14} />
+                    </a>
+                    <button
+                      onClick={() => handleTriggerLootAlert(deal)}
+                      style={{
+                        background: 'rgba(239,68,68,0.15)',
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        color: '#fca5a5',
+                        padding: '0.65rem 0.85rem',
+                        borderRadius: '10px',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.3rem'
+                      }}>
+                      <BellIcon size={14} /> Alert
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── TAB: SEARCH & COMPARISON ─── */}
         {activeTab === 'search' && (
           <div>
             {/* URL Paste Mode Banner */}
@@ -310,7 +538,7 @@ export default function App() {
                     overflowY: 'auto'
                   }}>
                     <div style={{ padding: '0.4rem 0.75rem', fontSize: '0.68rem', fontWeight: 800, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-subtle)', background: 'var(--bg-surface-elevated)' }}>
-                      {searchQuery.trim() ? 'Matching Products' : '🔥 Popular Tech Deals'}
+                      {searchQuery.trim() ? 'Matching Products' : '🔥 Popular Deals'}
                     </div>
                     {suggestions.map(p => (
                       <div
@@ -469,7 +697,7 @@ export default function App() {
           </div>
         )}
 
-        {/* HISTORY TAB */}
+        {/* ─── TAB: HISTORY ─── */}
         {activeTab === 'history' && selectedProduct && (
           <div>
             <button onClick={() => setActiveTab('search')} style={{
@@ -513,7 +741,7 @@ export default function App() {
           </div>
         )}
 
-        {/* WATCHLIST TAB */}
+        {/* ─── TAB: WATCHLIST ─── */}
         {activeTab === 'watchlist' && (
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -562,7 +790,7 @@ export default function App() {
           </div>
         )}
 
-        {/* SALES TAB */}
+        {/* ─── TAB: SALES ─── */}
         {activeTab === 'sales' && (
           <div>
             <div style={{ marginBottom: '1.25rem' }}>
@@ -596,6 +824,7 @@ export default function App() {
       {/* Bottom Nav */}
       <nav className="bottom-nav">
         {[
+          { id: 'loot', label: 'Loot Deals', emoji: '🔥', highlight: true },
           { id: 'search', label: 'Compare', emoji: '🔍' },
           { id: 'history', label: 'History', emoji: '📉' },
           { id: 'watchlist', label: 'Watchlist', emoji: '🔔', badge: watchlist.length },
@@ -605,7 +834,7 @@ export default function App() {
             className={'nav-tab' + (activeTab === tab.id ? ' active' : '')}
             onClick={() => { setActiveTab(tab.id); if (tab.id === 'watchlist') setWatchlist(getEnrichedWatchlist()); }}>
             <span style={{ fontSize: '1.2rem' }}>{tab.emoji}</span>
-            <span>{tab.label}</span>
+            <span style={tab.highlight ? { color: '#f87171', fontWeight: 800 } : {}}>{tab.label}</span>
             {tab.badge > 0 && <span className="nav-badge">{tab.badge}</span>}
           </button>
         ))}
